@@ -64,9 +64,14 @@ class ThumbnailEngine:
             badge_text = "🤖 2026 미래 기술 리포트"
 
         try:
-            badge_font = ImageFont.truetype(self.font_path, 38)
-            title_font = ImageFont.truetype(self.font_path, 76)
-            sub_font = ImageFont.truetype(self.font_path, 54)
+            if self.font_path and os.path.exists(self.font_path):
+                badge_font = ImageFont.truetype(self.font_path, 38)
+                title_font = ImageFont.truetype(self.font_path, 76)
+                sub_font = ImageFont.truetype(self.font_path, 54)
+            else:
+                badge_font = ImageFont.load_default()
+                title_font = ImageFont.load_default()
+                sub_font = ImageFont.load_default()
         except Exception:
             badge_font = ImageFont.load_default()
             title_font = ImageFont.load_default()

@@ -158,8 +158,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
         # Top Header Safe Zone Badge (Y=180)
         try:
-            badge_font = ImageFont.truetype(DEFAULT_FONT_PATH, 40)
-            topic_font = ImageFont.truetype(DEFAULT_FONT_PATH, 52)
+            if DEFAULT_FONT_PATH and os.path.exists(DEFAULT_FONT_PATH):
+                badge_font = ImageFont.truetype(DEFAULT_FONT_PATH, 40)
+                topic_font = ImageFont.truetype(DEFAULT_FONT_PATH, 52)
+            else:
+                badge_font = ImageFont.load_default()
+                topic_font = ImageFont.load_default()
         except Exception:
             badge_font = ImageFont.load_default()
             topic_font = ImageFont.load_default()

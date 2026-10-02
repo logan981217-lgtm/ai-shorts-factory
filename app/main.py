@@ -49,6 +49,7 @@ app = FastAPI(
     description="Enterprise-grade AI YouTube Shorts Automated Factory",
     version="1.0.0"
 )
+handler = app
 
 # CORS Middleware
 app.add_middleware(

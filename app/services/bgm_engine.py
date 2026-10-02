@@ -7,8 +7,16 @@ from pathlib import Path
 from typing import Dict, Any
 from app.config import APP_DIR
 
-BGM_DIR = APP_DIR / "static" / "assets" / "bgm"
-BGM_DIR.mkdir(parents=True, exist_ok=True)
+BGM_STATIC_DIR = APP_DIR / "static" / "assets" / "bgm"
+if os.environ.get("VERCEL") or not os.access(str(APP_DIR), os.W_OK):
+    BGM_DIR = Path("/tmp/bgm")
+else:
+    BGM_DIR = BGM_STATIC_DIR
+
+try:
+    BGM_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
 BGM_PRESETS = [
     {"id": "energetic", "name": "🔥 활기찬 텐션 비트 (Energetic Beat)", "desc": "트렌드, 꿀팁, 동기부여 영상에 적합"},
@@ -20,14 +28,24 @@ BGM_PRESETS = [
 
 class BGMEngine:
     def __init__(self):
-        self._ensure_default_bgm_files()
+        try:
+            self._ensure_default_bgm_files()
+        except Exception as e:
+            print(f"[BGMEngine] Warning: {e}")
 
     def get_bgm_path(self, style: str) -> str:
         if style == "none":
             return ""
+        # Check static dir first
+        static_file = BGM_STATIC_DIR / f"{style}.wav"
+        if static_file.exists():
+            return str(static_file)
         filepath = BGM_DIR / f"{style}.wav"
         if not filepath.exists():
-            self._generate_preset_bgm(style, str(filepath))
+            try:
+                self._generate_preset_bgm(style, str(filepath))
+            except Exception:
+                return ""
         return str(filepath)
 
     def _ensure_default_bgm_files(self):
