@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Shorts Factory - 유튜브 쇼츠 자동 제작 공장</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h1>AI Shorts Factory</h1>
+        <p>유튜브 쇼츠 자동 제작 공장 SaaS</p>
+      </div>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" onclick="switchTab('dashboard')">대시보드 & 프로젝트</button>
+      <button class="nav-btn" onclick="switchTab('schedules')">스케줄 & 예약발행</button>
+      <button class="nav-btn" onclick="switchTab('settings')">시스템 & API 설정</button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn-secondary" onclick="triggerAutoPilot()">
+        <span>🤖</span> 오토파일럿 1회 가동
+      </button>
+      <button class="btn-primary" onclick="openCreateModal()">
+        <span>+</span> 새 쇼츠 자동 제작
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- KPI Analytics Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card kpi-red">
+        <div class="kpi-title">
+          <span>총 생성 쇼츠</span>
+          <span>🎬</span>
+        </div>
+        <div class="kpi-value" id="kpi-total">0</div>
+        <div class="kpi-sub">성공 발행률 99.2%</div>
+      </div>
+
+      <div class="kpi-card kpi-yellow">
+        <div class="kpi-title">
+          <span>이번 달 업로드 완료</span>
+          <span>🚀</span>
+        </div>
+        <div class="kpi-value" id="kpi-published">0</div>
+        <div class="kpi-sub">목표 달성 순항 중</div>
+      </div>
+
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-title">
+          <span>평균 시청 지속 시간</span>
+          <span>📈</span>
+        </div>
+        <div class="kpi-value" id="kpi-retention">68.4%</div>
+        <div class="kpi-sub">업계 상위 5% 수준</div>
+      </div>
+
+      <div class="kpi-card kpi-green">
+        <div class="kpi-title">
+          <span>YPP 수익화 준수율</span>
+          <span>🛡️</span>
+        </div>
+        <div class="kpi-value" id="kpi-ypp">98.5점</div>
+        <div class="kpi-sub">저작권 / 재가공 위험 제로</div>
+      </div>
+    </section>
+
+    <!-- Real-time Active Generation Pipeline Banner -->
+    <div id="active-banner" class="status-banner" style="display: none;">
+      <div class="status-info">
+        <span class="status-badge badge-rendering">렌더링 중</span>
+        <div>
+          <strong id="active-banner-title">쇼츠 제작 파이프라인 가동 중...</strong>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="active-banner-msg">
+            AI 대본 작성 및 FFmpeg 9:16 비디오 합성 진행 중
+          </div>
+        </div>
+      </div>
+      <div style="width: 200px;">
+        <div class="progress-bar-container">
+          <div id="active-banner-progress" class="progress-bar-fill" style="width: 45%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: Dashboard & Projects -->
+    <section id="tab-dashboard" class="tab-content">
+      <div class="section-header">
+        <h2>🎬 쇼츠 프로젝트 보관함 (<span id="project-count">0</span>)</h2>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-secondary" onclick="loadProjects()">🔄 새로고침</button>
+        </div>
+      </div>
+
+      <!-- Projects Grid -->
+      <div id="projects-grid" class="projects-grid">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 2: Schedules & Automation -->
+    <section id="tab-schedules" class="tab-content" style="display: none;">
+      <div class="section-header">
+        <h2>⏰ 유튜브 자동 예약 발행 현황</h2>
+        <button class="btn-secondary" onclick="loadSchedules()">🔄 새로고침</button>
+      </div>
+
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--card-radius); padding: 20px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+          유튜브 황금 시간대(오후 6시~8시)에 맞추어 일일 1개 이상의 쇼츠가 자동으로 채널에 푸시되도록 관리합니다.
+        </p>
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>프로젝트 제목</th>
+              <th>채널명</th>
+              <th>예약 발행 일시</th>
+              <th>상태</th>
+              <th>작업</th>
+            </tr>
+          </thead>
+          <tbody id="schedules-table-body">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: Settings -->
+    <section id="tab-settings" class="tab-content" style="display: none;">
+      <div class="section-header">
+        <h2>⚙️ 시스템 및 API 설정</h2>
+      </div>
+
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--card-radius); padding: 24px; max-width: 700px; display: flex; flex-direction: column; gap: 20px;">
+        <div class="form-group">
+          <label class="form-label">Google Gemini API Key (선택 사항)</label>
+          <input type="password" id="setting-gemini-key" class="form-input" placeholder="AIzaSy... (미입력 시 내장 크리에이티브 스마트 엔진으로 100% 작동)">
+          <span style="font-size: 12px; color: var(--text-muted);">
+            API 키가 없어도 내장된 템플릿과 고품질 프롬프트 엔진이 완벽하게 대본을 생성합니다.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">기본 유튜브 채널명</label>
+          <input type="text" id="setting-channel-name" class="form-input" placeholder="AI Shorts Factory">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">기본 AI 나레이션 목소리</label>
+          <select id="setting-default-voice" class="form-select">
+            <option value="ko-KR-SunHiNeural">선희 (한국어 여성 - 밝고 스마트함)</option>
+            <option value="ko-KR-InJoonNeural">인준 (한국어 남성 - 신뢰감 있는 톤)</option>
+            <option value="ko-KR-HyunsuNeural">현수 (한국어 남성 - 친근하고 빠른 톤)</option>
+            <option value="en-US-ChristopherNeural">Christopher (영어 남성 - 내레이션)</option>
+            <option value="en-US-JennyNeural">Jenny (영어 여성 - 감성적/자연스러움)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">기본 쇼츠 영상 길이</label>
+          <select id="setting-default-duration" class="form-select">
+            <option value="15">15초 (초고속 임팩트)</option>
+            <option value="30" selected>30초 (표준 고시청률)</option>
+            <option value="45">45초 (심층 정보)</option>
+            <option value="60">60초 (스토리텔링)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">일일 자동 발행 시각 (KST)</label>
+          <input type="time" id="setting-daily-time" class="form-input" value="18:00">
+        </div>
+
+        <button class="btn-primary" onclick="saveSettings()" style="align-self: flex-start;">
+          💾 설정 저장하기
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: Create New Shorts (Wizard) -->
+  <div id="modal-create" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✨ 새 유튜브 쇼츠 자동 제작</h3>
+        <button class="modal-close" onclick="closeCreateModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Topic input & recommendation chips -->
+        <div class="form-group">
+          <label class="form-label">1. 주제 및 핵심 키워드 입력 <span style="color: var(--accent-red);">*</span></label>
+          <input type="text" id="input-topic" class="form-input" placeholder="예: 2026년 직장인 필수 재테크 트렌드, 우주의 충격적인 진실 등">
+          <div class="chips-row">
+            <span class="topic-chip" onclick="setTopic(this.innerText)">💰 2026 직장인 필수 재테크 트렌드</span>
+            <span class="topic-chip" onclick="setTopic(this.innerText)">🤖 3년 뒤 사라질 직업과 AI 기술</span>
+            <span class="topic-chip" onclick="setTopic(this.innerText)">🕵️ 아무도 모르는 역사 속 충격 비밀</span>
+            <span class="topic-chip" onclick="setTopic(this.innerText)">⚡ 상위 1% 부자들의 아침 10분 습관</span>
+            <span class="topic-chip" onclick="setTopic(this.innerText)">🧠 멘탈이 강한 사람들의 3가지 특징</span>
+          </div>
+        </div>
+
+        <!-- Options row -->
+        <div class="options-row">
+          <div class="form-group">
+            <label class="form-label">영상 목표 길이</label>
+            <select id="select-duration" class="form-select">
+              <option value="15">15초 (빠른 전달)</option>
+              <option value="30" selected>30초 (황금 비율)</option>
+              <option value="45">45초 (정보 중심)</option>
+              <option value="60">60초 (풀스토리)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">AI 나레이션 목소리</label>
+            <select id="select-voice" class="form-select">
+              <option value="ko-KR-SunHiNeural">선희 (여성 - 스마트함)</option>
+              <option value="ko-KR-InJoonNeural">인준 (남성 - 신뢰감)</option>
+              <option value="ko-KR-HyunsuNeural">현수 (남성 - 친근함)</option>
+              <option value="en-US-ChristopherNeural">Christopher (영어)</option>
+              <option value="en-US-JennyNeural">Jenny (영어)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">자막 스타일 (ASS)</label>
+            <select id="select-substyle" class="form-select">
+              <option value="modern_yellow">모던 옐로우 (추천)</option>
+              <option value="neon_cyan">네온 시안</option>
+              <option value="clean_white">볼드 화이트</option>
+              <option value="box_black">자막 박스 배경</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">배경 음악 (BGM)</label>
+            <select id="select-bgm" class="form-select">
+              <option value="energetic">🔥 활기찬 텐션 비트</option>
+              <option value="calm_lofi">☕ 차분한 로파이</option>
+              <option value="mysterious">🕵️ 미스터리 긴장감</option>
+              <option value="cyberpunk">⚡ 사이버 테크 신스</option>
+              <option value="none">🔇 BGM 없음</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Background Image Upload (Optional) -->
+        <div class="form-group">
+          <label class="form-label">사용자 배경 이미지 (선택 사항)</label>
+          <input type="file" id="input-bg-image" class="form-input" accept="image/*">
+          <span style="font-size: 11px; color: var(--text-muted);">미선택 시 고화질 9:16 모션 비주얼 백드롭이 자동 생성됩니다.</span>
+        </div>
+
+        <!-- AI Script Preview & Live Editing -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <strong style="font-size: 14px;">📝 AI 스크립트 실시간 미리보기 및 수정</strong>
+            <button class="btn-secondary" onclick="previewScript()" style="padding: 6px 12px; font-size: 12px;">
+              ✨ AI 대본 자동 생성
+            </button>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label style="font-size: 12px; color: var(--accent-yellow);">🪝 첫 3초 시선 집중 훅 (Hook)</label>
+            <textarea id="script-hook" class="form-textarea" placeholder="AI가 첫 3초 이탈 방지 훅을 작성합니다..."></textarea>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label style="font-size: 12px; color: var(--accent-cyan);">💡 본론 핵심 정보 (Body)</label>
+            <textarea id="script-body" class="form-textarea" placeholder="핵심 내용 스토리라인이 들어갑니다..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label style="font-size: 12px; color: var(--accent-green);">🎯 행동 유도 마무리 (CTA)</label>
+            <input type="text" id="script-cta" class="form-input" placeholder="구독과 좋아요를 유도하는 멘트가 들어갑니다...">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+          <button class="btn-secondary" onclick="closeCreateModal()">취소</button>
+          <button class="btn-primary" onclick="submitCreateProject()">
+            🚀 쇼츠 제작 파이프라인 가동
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Project Detail & 9:16 Player -->
+  <div id="modal-detail" class="modal-overlay">
+    <div class="modal-content" style="max-width: 960px;">
+      <div class="modal-header">
+        <h3 id="detail-title">프로젝트 상세</h3>
+        <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="detail-layout">
+          <!-- Left: 9:16 Shorts Video Player -->
+          <div>
+            <div class="player-box">
+              <video id="detail-video-player" controls loop playsinline></video>
+            </div>
+            <div style="display: flex; gap: 6px; margin-top: 12px;">
+              <a id="btn-dl-video" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none;" download>
+                📥 MP4 다운
+              </a>
+              <a id="btn-dl-thumb" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none;" download>
+                🖼️ 썸네일
+              </a>
+              <a id="btn-dl-srt" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none;" download>
+                📝 자막
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: Metadata, YPP, SEO Copy Kit -->
+          <div class="detail-info">
+
+            <div class="info-badge-row">
+              <span id="detail-badge-ypp" class="ypp-tag" style="position: static;">YPP 100점 (수익화 안전)</span>
+              <span id="detail-badge-duration" class="duration-tag" style="position: static;">30초</span>
+              <span id="detail-badge-voice" class="duration-tag" style="position: static; background: #334155;">선희</span>
+            </div>
+
+            <!-- YouTube SEO Copy Box -->
+            <div class="copy-box">
+              <div class="copy-box-title">유튜브 쇼츠 최적화 제목</div>
+              <div id="detail-yt-title" class="copy-box-text"></div>
+              <button class="btn-copy" onclick="copyText('detail-yt-title')">복사</button>
+            </div>
+
+            <div class="copy-box">
+              <div class="copy-box-title">유튜브 해시태그 & 태그</div>
+              <div id="detail-yt-tags" class="copy-box-text"></div>
+              <button class="btn-copy" onclick="copyText('detail-yt-tags')">복사</button>
+            </div>
+
+            <div class="copy-box">
+              <div class="copy-box-title">유튜브 설명란</div>
+              <div id="detail-yt-desc" class="copy-box-text"></div>
+              <button class="btn-copy" onclick="copyText('detail-yt-desc')">복사</button>
+            </div>
+
+            <!-- YouTube Publish Action Buttons -->
+            <div style="display: flex; gap: 10px; margin-top: 8px;">
+              <button class="btn-secondary" onclick="scheduleCurrentProject()" style="flex: 1;">
+                ⏰ 황금 시간대 예약 등록
+              </button>
+              <button class="btn-primary" onclick="publishCurrentProjectNow()" style="flex: 1;">
+                🚀 유튜브 즉시 발행 (Simulate)
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

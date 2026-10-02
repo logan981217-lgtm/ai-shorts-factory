@@ -1,0 +1,21 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and render cache
+temp/
+*.log
+
+# Database (optional: keep or ignore)
+# ai_shorts_factory.db
+
+# Output media
+output/
+temp/
+
