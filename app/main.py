@@ -62,7 +62,11 @@ app.add_middleware(
 
 # Mount Static and Output files
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
-app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
+try:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
+except Exception as e:
+    print(f"Warning: could not mount /output: {e}")
 
 # Background rendering pipeline worker
 async def run_project_generation_task(project_id: str, custom_image_path: Optional[str] = None):
